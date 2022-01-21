@@ -1,0 +1,31 @@
+name: Deploy to Oracle Khanh Digital
+
+on:
+  push:
+    branches: [master]
+  
+  jobs:
+    publish-app:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout GitHub actions
+        uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c release --no-restore
+      - name: Install zip
+        uses: montudor/action-zip@v1
+      - name: Zip output
+        run: zip -qq -r horizon.zip bin/release/netcoreapp3.1
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: oracle.khanh.digital
+          username: opc
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./bin/release/netcoreapp3.1/
