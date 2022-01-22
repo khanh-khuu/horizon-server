@@ -3,9 +3,7 @@
 @using horizon_server.Data
 @inject WeatherForecastService ForecastService
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from a service.</p>
+<h1>Dự báo thời tiết Bình Dương</h1>
 
 @if (forecasts == null)
 {
@@ -16,20 +14,29 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Ngày</th>
+                <th>Nhiệt độ thấp nhất (*C)</th>
+                <th>Nhiệt độ cao nhất (*C)</th>
+                <th>Nhiệt độ trung bình (*C)</th>
+                <th>Độ ẩm (%)</th>
+                <th>Khả năng có mưa (%)</th>
+                <th>#</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var forecast in forecastdays)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@forecast.date</td>
+                    <td>@forecast.day.mintemp_c</td>
+                    <td>@forecast.day.maxtemp_c</td>
+                    <td>@forecast.day.avgtemp_c</td>
+                    <td>@forecast.day.avghumidity</td>
+                    <td>@forecast.day.daily_chance_of_rain</td>
+                    <td>@forecast.day.condition.text</td>
+                    <td><img src="@forecast.day.condition.icon" /></td>
+                    
                 </tr>
             }
         </tbody>
@@ -37,10 +44,17 @@ else
 }
 
 @code {
-    private WeatherForecast[] forecasts;
+    private WeatherForecast forecasts;
+
+    private List<Forecastday> forecastdays {
+        get
+        {
+            return forecasts.forecast.forecastday;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        forecasts = await ForecastService.GetForecastAsync();
     }
 }

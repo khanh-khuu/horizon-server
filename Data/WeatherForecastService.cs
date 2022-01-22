@@ -1,25 +1,26 @@
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace horizon_server.Data
 {
     public class WeatherForecastService
     {
-        private static readonly string[] Summaries = new[]
+        private static readonly string API_URL = "http://api.weatherapi.com/v1/forecast.json?key=dce3d8881bf34be99b384959222201&q=Binh Duong&days=10&aqi=no&alerts=no"; 
+        
+        public  async Task<WeatherForecast> GetForecastAsync()
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            HttpClient client = new HttpClient();
+            
+            var response = await client.GetAsync(API_URL);
 
-        public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate)
-        {
-            var rng = new Random();
-            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = startDate.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            }).ToArray());
+            var content = await response.Content.ReadAsStringAsync();
+
+            var json = JsonSerializer.Deserialize<WeatherForecast>(content);
+
+            return json;
         }
     }
 }
