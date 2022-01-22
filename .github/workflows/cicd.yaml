@@ -22,10 +22,29 @@ jobs:
     #   uses: montudor/action-zip@v1
     # - name: Zip output
     #   run: zip -qq -r horizon.zip publish
+
+    - name: Rename web.config to _web.config to stop app.
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.FTP_SERVER }}')
+        ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
+        ftp.rename('web.config', '_web.config')
+        ftp.quit()
+
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.2.0
       with:
-        server: oracle.khanh.digital
-        username: opc
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
+
+    - name: Rename _web.config back to web.config to start app.
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.FTP_SERVER }}')
+        ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
+        ftp.rename('_web.config', 'web.config')
+        ftp.quit()
